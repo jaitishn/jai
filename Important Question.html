@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Will You Be My Valentine?</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Dancing Script', cursive;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      font-size: 4em;
+      margin: 0.2em 0;
+      color: #e55d87;
+    }
+
+    p {
+      font-size: 2em;
+      margin: 1em 0;
+    }
+
+    .buttons {
+      margin-top: 20px;
+    }
+
+    button {
+      background: linear-gradient(to right, #e55d87, #5fc3e4);
+      border: none;
+      color: white;
+      padding: 15px 30px;
+      text-align: center;
+      font-size: 1.5em;
+      margin: 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #d14d77, #4fb3d4);
+      transform: scale(1.1);
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .hearts {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    .heart {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: red;
+      clip-path: polygon(50% 0%, 100% 40%, 75% 100%, 50% 75%, 25% 100%, 0% 40%);
+      opacity: 0.8;
+      animation: floatHearts 5s infinite ease-in-out;
+    }
+
+    @keyframes floatHearts {
+      0% {
+        transform: translateY(100vh) scale(0.5);
+        opacity: 0.8;
+      }
+      50% {
+        transform: translateY(50vh) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Will you be my Valentine?</h1>
+    <p>You light up my life in ways I never thought possible. My world feels complete with you in it. Will you make me the happiest person by being my Valentine?</p>
+    <div class="buttons">
+      <button onclick="triggerFireworks(event)">Yes ❤️</button>
+      <button onclick="triggerFireworks(event)">Definitely Yes ❤️</button>
+    </div>
+  </div>
+
+  <canvas id="fireworksCanvas"></canvas>
+  <div class="hearts" id="heartsContainer"></div>
+  <audio id="bgMusic" src="your_music_file.mp3" loop></audio>
+
+  <script>
+    const canvas = document.getElementById('fireworksCanvas');
+    const ctx = canvas.getContext('2d');
+    const heartsContainer = document.getElementById('heartsContainer');
+    let particles = [];
+    let fireworksActive = false;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function triggerFireworks(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      
+      if (!fireworksActive) {
+        fireworksActive = true;
+        createFirework(x, y);
+        showCongratulations();
+        playMusic();
+        let interval = setInterval(() => createFirework(Math.random() * canvas.width, Math.random() * canvas.height), 200);
+                setTimeout(() => {
+                  clearInterval(interval);
+                  fireworksRunning = false;
+                }, 10000); // Fireworks will last for 10 seconds
+      }
+    }
+
+    function createFirework(x, y) {
+      const colors = ['#FF1461', '#18FF92', '#5A87FF', '#FBF38C'];
+      const numParticles = 30;
+      for (let i = 0; i < numParticles; i++) {
+        const angle = (i * 2 * Math.PI) / numParticles;
+        const speed = Math.random() * 4 + 2;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        particles.push({ x, y, vx, vy, color, alpha: 1 });
+      }
+    }
+
+    function updateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles = particles.filter(p => p.alpha > 0);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= 0.02;
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+      requestAnimationFrame(updateParticles);
+    }
+
+    function createFloatingHearts() {
+      const heart = document.createElement('div');
+      heart.classList.add('heart');
+      heart.style.left = Math.random() * window.innerWidth + 'px';
+      heart.style.animationDuration = Math.random() * 3 + 2 + 's';
+      heartsContainer.appendChild(heart);
+
+      setTimeout(() => heart.remove(), 5000);
+    }
+
+    function showCongratulations() {
+      document.querySelector('h1').textContent = "Congratulations!";
+      document.querySelector('p').textContent = "Forever begins today! Congratulations on being my Valentine and the love of my life ❤️";
+      document.body.style.background = 'linear-gradient(135deg, #ff7e5f, #feb47b)';
+    }
+
+    function playMusic() {
+      document.getElementById('bgMusic').play();
+    }
+
+    function endFireworks() {
+      fireworksActive = false;
+      document.body.style.background = 'linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb)'; // Reset background
+    }
+
+    setInterval(createFloatingHearts, 300);
+    updateParticles();
+  </script>
+</body>
+</html>
